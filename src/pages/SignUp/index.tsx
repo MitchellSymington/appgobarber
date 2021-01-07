@@ -125,7 +125,7 @@ const SignUp: React.FC = () => {
                 ref={passwordInputRef}
                 name="password"
                 icon="lock"
-                placeholder="Password"
+                placeholder="Senha"
                 textContentType="newPassword"
                 secureTextEntry
                 returnKeyType="send"

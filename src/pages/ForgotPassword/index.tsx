@@ -5,7 +5,6 @@ import {
   ScrollView,
   KeyboardAvoidingView,
   Platform,
-  TextInput,
   Alert,
 } from 'react-native';
 import Icon from 'react-native-vector-icons/Feather';
@@ -14,55 +13,51 @@ import * as Yup from 'yup';
 
 import { Form } from '@unform/mobile';
 import { FormHandles } from '@unform/core';
-
-import { useAuth } from '../../hooks/auth';
+import Button from '../../components/Button';
 
 import getValidationErrors from '../../utils/getValidationErrors';
 
 import {
   Container,
   Title,
-  ForgotPassword,
-  ForgotPasswordText,
   CreateAccountButton,
   CreateAccountButtonText,
 } from './styles';
 
 import Input from '../../components/Input';
-import Button from '../../components/Button';
+import api from '../../services/api';
 
 import logoImg from '../../assets/logo.png';
 
-interface SignInFormData {
+interface ForgotPasswordFormData {
   email: string;
-  password: string;
 }
 
-const Signin: React.FC = () => {
+const ForgotPassword: React.FC = () => {
   const formRef = useRef<FormHandles>(null);
-  const passwordInputRef = useRef<TextInput>(null);
-  const navigation = useNavigation();
+  const { goBack } = useNavigation();
 
-  const { signIn } = useAuth();
-
-  const handleSignIn = useCallback(async (data: SignInFormData) => {
+  const handleSignIn = useCallback(async (data: ForgotPasswordFormData) => {
     try {
       formRef.current?.setErrors({});
       const schema = Yup.object().shape({
         email: Yup.string()
           .required('E-mail é obrigatório')
           .email('Digite um e-mail válido'),
-        password: Yup.string().required('Senha errada'),
       });
 
       await schema.validate(data, {
         abortEarly: false,
       });
 
-      await signIn({
-        email: data.email,
-        password: data.password,
-      });
+      const { email } = data;
+
+      api.post('/password/forgot', { email });
+
+      Alert.alert(
+        'Solicitação de recuperação realizada com sucesso !',
+        'Verifique seu e-mail',
+      );
     } catch (err) {
       if (err instanceof Yup.ValidationError) {
         const errors = getValidationErrors(err);
@@ -72,8 +67,8 @@ const Signin: React.FC = () => {
         return;
       }
       Alert.alert(
-        'Erro na autenticação',
-        'Erro ao fazer login, verifique suas credencias',
+        'Erro ao solicitar a recuperação de senha',
+        'tente novamente mais tarde',
       );
     }
   }, []);
@@ -93,7 +88,7 @@ const Signin: React.FC = () => {
             <Image source={logoImg} />
 
             <View>
-              <Title>Faça seu logon</Title>
+              <Title>Recuperação de senha</Title>
             </View>
 
             <Form ref={formRef} onSubmit={handleSignIn}>
@@ -106,42 +101,28 @@ const Signin: React.FC = () => {
                 keyboardType="email-address"
                 returnKeyType="next"
                 onSubmitEditing={() => {
-                  passwordInputRef.current?.focus();
-                }}
-              />
-
-              <Input
-                ref={passwordInputRef}
-                name="password"
-                icon="lock"
-                placeholder="Senha"
-                secureTextEntry
-                returnKeyType="send"
-                onSubmitEditing={() => {
                   formRef.current?.submitForm();
                 }}
               />
 
-              <Button onPress={() => formRef.current?.submitForm()}>
-                Entrar
+              <Button
+                onPress={() => {
+                  formRef.current?.submitForm();
+                }}
+              >
+                Recuperar
               </Button>
             </Form>
-
-            <ForgotPassword
-              onPress={() => navigation.navigate('ForgotPassword')}
-            >
-              <ForgotPasswordText>Esqueci minha Senha</ForgotPasswordText>
-            </ForgotPassword>
           </Container>
         </ScrollView>
       </KeyboardAvoidingView>
 
-      <CreateAccountButton onPress={() => navigation.navigate('SignUp')}>
-        <Icon name="log-in" size={20} color="#ff9000" />
-        <CreateAccountButtonText>Criar conta</CreateAccountButtonText>
+      <CreateAccountButton onPress={() => goBack()}>
+        <Icon name="arrow-left" size={20} color="#fff" />
+        <CreateAccountButtonText>Voltar</CreateAccountButtonText>
       </CreateAccountButton>
     </>
   );
 };
 
-export default Signin;
+export default ForgotPassword;
