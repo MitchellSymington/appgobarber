@@ -271,7 +271,7 @@ const Profile: React.FC = () => {
                 signOut();
               }}
             >
-              Confirmar mudanças
+              Sair
             </ExitButton>
           </Container>
         </ScrollView>
