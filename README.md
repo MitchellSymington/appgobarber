@@ -14,6 +14,6 @@
 :four: Iniciar</br>
 `$ npx react-native run ios/android `</br>
 
-:five: Restart rapido</br>
+:five: Restart rápido</br>
 `$ yarn ios/android `</br>
 
